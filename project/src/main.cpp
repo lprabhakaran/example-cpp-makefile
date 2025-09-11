@@ -3,7 +3,11 @@
 using namespace std;
 
 int main(const int argc, const char** argv) {
-  cout << "Hello world!" << endl;
+  
+  char buffer[8];
+    std::cout << "Enter your name: ";
+    std::cin >> buffer;  // No bounds checking!
+    std::cout << "Hello, " << buffer << std::endl;
 
   return 0;
 }
