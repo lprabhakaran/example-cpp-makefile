@@ -1,12 +1,12 @@
 #include <iostream>
 
 // Declarations
-void bufferOverflowExample();
+//void bufferOverflowExample();
 void formatStringExample();
 void commandInjectionExample();
 
 int main() {
-    bufferOverflowExample();
+   // bufferOverflowExample();
     formatStringExample();
     commandInjectionExample();
     return 0;
