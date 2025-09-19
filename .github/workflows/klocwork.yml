@@ -1,0 +1,67 @@
+name: Klocwork CI Analysis
+
+on:
+  pull_request:
+    branches:
+      - main # Or your default branch
+
+jobs:
+  klocwork-differential-analysis:
+    # Use a self-hosted runner where Klocwork is installed.
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for accurate diffing
+          fetch-depth: 0 
+      
+      - name: Configure Klocwork credentials
+        run: |
+          # Use Klocwork's license configuration utility if required
+          # Depending on your setup, you might need to use `kwauth` or set environment variables for the Klocwork license server
+          echo "KLOCWORK_LTOKEN=$LTOKEN" >> $GITHUB_ENV
+        env:
+          LTOKEN: ${{ secrets.KLOCWORK_LTOKEN }}
+          
+      - name: Initialize kwciagent
+        run: |
+          # The KW_SERVER_URL and KW_PROJECT must match your Klocwork Server setup.
+          # The `--build-spec` flag imports a pre-existing build specification for system context.
+          # The `.kwlp` and `.kwps` folders will be created in your workspace.
+          kwciagent create \
+            --url http://localhost:9009/cpp \
+            --build-spec ./kwinject.out
+          
+      - name: Generate build specification for changed files
+        run: |
+          # Use `kwinject` to capture the build of your changed files.
+          # The command you use depends on your project's build system (e.g., make, msbuild).
+          # This example assumes a simple 'make' build command.
+          kwinject make
+          
+      - name: Get list of changed files
+        id: diff
+        run: |
+          # Generate a list of changed files between the base branch (e.g., main) and the head branch.
+          # This list is used by `kwciagent` for differential analysis.
+          git diff --name-only ${{ github.base_ref }} ${{ github.head_ref }} > diff_file_list.txt
+          
+      - name: Run kwciagent analysis
+        run: |
+          # Perform the differential analysis on the changed files.
+          # The `ci_build_1` is an example build name. It should be unique for each run.
+          # The `-i` flag ensures the analysis is incremental.
+          kwciagent run \
+            --ci-build ci-pr-${{ github.event.number }}-${{ github.sha }} \
+            @diff_file_list.txt
+            
+      - name: Report failures via Klocwork quality gateway
+        run: |
+          # Run a quality gate check based on the differential analysis results.
+          # This step can be configured to fail the build if new critical issues are found.
+          # Use the `kwciagent` tool with a report format to integrate with the build status.
+          kwciagent list -F detailed --report kwciagent.txt
+          # Add custom logic to parse `kwciagent.txt` and report failures.
+          # Or, use Klocwork's built-in quality gateway command-line tools.
