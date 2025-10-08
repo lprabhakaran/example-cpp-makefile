@@ -1,4 +1,4 @@
-# [:] Example C++ project using Makefile. 
+# [:] Example C++ project using Makefile.  
 
 An example C++ project using Makefile to demonstrate [SourceClear](https://www.sourceclear.com) scans.
 
