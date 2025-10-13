@@ -5,4 +5,6 @@ void formatStringExample() {
     printf("Enter your name: ");
     scanf("%s", userInput);
     printf(userInput);  // Vulnerable if user enters format specifiers
+
+     printf(userInput);  // Vulnerable if user enters format specifiers
 }
