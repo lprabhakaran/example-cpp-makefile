@@ -1,5 +1,11 @@
 #include <cstdio>
 
+
+
+
+
+
+
 void formatStringExample() {
     char userInput[100];
     printf("Enter your name: ");
